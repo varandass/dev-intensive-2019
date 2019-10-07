@@ -2,6 +2,7 @@ package ru.skillbranch.devintensive.extensions
 
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.abs
 
 
 const val SECOND = 1000L
@@ -31,16 +32,23 @@ fun Date.add(value: Int, units: TimeUnits = TimeUnits.SECOND): Date {
 }
 
 fun Date.humanizeDiff(date: Date = Date()): String {
-    return when (val time = date.time - this.time) {
-        in 0 * SECOND..1 * SECOND -> "только что"
-        in 1 * SECOND..45 * SECOND -> "несколько секунд назад"
-        in 45 * SECOND..75 * SECOND -> "минуту назад"
-        in 75 * SECOND..45 * MINUTE -> "${time / MINUTE} минут назад"
-        in 45 * MINUTE..75 * MINUTE -> "час назад"
-        in 75 * MINUTE..22 * HOUR -> "${time / HOUR} часов назад"
-        in 22 * HOUR..26 * HOUR -> "день назад"
-        in 26 * HOUR..360 * DAY -> "${time / DAY} дней назад"
-        else -> "более года назад"
+    val diff = date.time - this.time
+    val absDiff = abs(diff)
+    val isPast = diff > 0
+
+    return when {
+        absDiff / SECOND <= 1 -> "только что"
+        absDiff / SECOND <= 45 -> if (isPast) "несколько секунд назад" else "через несколько секунд"
+        absDiff / SECOND <= 75 -> if (isPast) "минуту назад" else "через минуту"
+        absDiff / MINUTE <= 45 -> if (isPast) "${TimeUnits.MINUTE.plural((absDiff / MINUTE).toInt())} назад"
+        else "через ${TimeUnits.MINUTE.plural((absDiff / MINUTE).toInt())}"
+        absDiff / MINUTE <= 75 -> if (isPast) "час назад" else "через час"
+        absDiff / HOUR <= 22 -> if (isPast) "${TimeUnits.HOUR.plural((absDiff / HOUR).toInt())} назад"
+        else "через ${TimeUnits.HOUR.plural((absDiff / HOUR).toInt())}"
+        absDiff / HOUR <= 26 -> if (isPast) "день назад" else "через день"
+        absDiff / DAY <= 360 -> if (isPast) "${TimeUnits.DAY.plural((absDiff / DAY).toInt())} назад"
+        else "через ${TimeUnits.DAY.plural((absDiff / DAY).toInt())}"
+        else -> if (isPast) "более года назад" else "более чем через год"
     }
 }
 

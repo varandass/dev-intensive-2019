@@ -70,27 +70,10 @@ object Utils {
         return "$result"
     }
 
-    fun toInitials(firstName: String?, lastName: String?): String? {
-
-        var firstInitial = firstName?.getOrNull(0)?.toUpperCase()?.toString()
-        var lastInitial = lastName?.getOrNull(0)?.toUpperCase()?.toString()
-
-        when (firstInitial) {
-            "" -> firstInitial = null
-            " " -> firstInitial = null
-        }
-        when (lastInitial) {
-            "" -> lastInitial = null
-            " " -> lastInitial = null
-        }
-
-        var result = "$firstInitial$lastInitial"
-
-        if (firstInitial == null) {
-            result = "$lastInitial"
-        } else if (lastInitial == null) {
-            result = "$firstInitial"
-        }
-        return result
+    fun toInitials(firstName: String?, lastName: String?) = when {
+        (firstName.isNullOrBlank() && lastName.isNullOrBlank()) -> null
+        firstName.isNullOrBlank() -> "${lastName?.trim()?.get(0)}".toUpperCase()
+        lastName.isNullOrBlank() -> "${firstName.trim()[0]}".toUpperCase()
+        else -> "${firstName.trim()[0]}${lastName.trim()[0]}".toUpperCase()
     }
 }
